@@ -4,3 +4,4 @@ langchain-ollama==0.3.10
 PyJWT==2.10.1
 python-dotenv==1.1.1
 uvicorn==0.38.0
+cryptography
