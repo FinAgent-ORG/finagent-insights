@@ -26,7 +26,7 @@ app.add_middleware(
 
 _request_log: dict[str, deque[float]] = defaultdict(deque)
 llm = ChatOllama(
-    model=os.getenv("OLLAMA_MODEL", "llama3.1"),
+    model=os.getenv("OLLAMA_MODEL", "llama3.2:1b"),
     base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
     temperature=float(os.getenv("OLLAMA_TEMPERATURE", "0")),
 )
