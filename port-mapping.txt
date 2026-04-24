@@ -1,0 +1,3 @@
+service=finagent-insights-service
+container_port=8003
+app_entrypoint=app.main:app
