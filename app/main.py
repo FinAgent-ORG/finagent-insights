@@ -2,16 +2,17 @@ import json
 import os
 import time
 from collections import defaultdict, deque
+from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_ollama import ChatOllama
 
-from clients import fetch_recent_expenses
-from prompts import SYSTEM_PROMPT_INSIGHTS
-from schemas import ExpenseRecord, InsightsResponse
-from security import oauth2_scheme, require_user
+from .clients import fetch_recent_expenses
+from .prompts import SYSTEM_PROMPT_INSIGHTS
+from .schemas import ExpenseRecord, InsightsResponse
+from .security import oauth2_scheme, require_user
 
 load_dotenv()
 
@@ -60,7 +61,7 @@ async def health() -> dict[str, str]:
 def _fallback_response() -> InsightsResponse:
     return InsightsResponse(
         insights=["There was not enough recent expense data to generate strong insights."],
-        suggestions=["Log more expenses over time to unlock better trend analysis."],
+        suggestions=["Log more company expenses over time to unlock better trend analysis."],
     )
 
 
@@ -93,7 +94,7 @@ async def generate_insights(expenses: list[ExpenseRecord]) -> InsightsResponse:
     if not expenses:
         return InsightsResponse(
             insights=["No expenses were found for the last 30 days."],
-            suggestions=["Log a few expenses to unlock personalized insights."],
+            suggestions=["Log a few company expenses to unlock better operating insights."],
         )
 
     serialized = json.dumps([expense.model_dump(mode="json") for expense in expenses], ensure_ascii=False)
@@ -107,11 +108,12 @@ async def generate_insights(expenses: list[ExpenseRecord]) -> InsightsResponse:
     return parse_markdown_sections(content)
 
 
-@app.get("/api/v1/insights/summary", response_model=InsightsResponse)
+@app.get("/api/v1/insights/summary")
 async def summary(
-    current_user: dict = Depends(require_user),
-    token: str = Depends(oauth2_scheme),
+    current_user: Annotated[dict, Depends(require_user)],
+    token: Annotated[str, Depends(oauth2_scheme)],
 ) -> InsightsResponse:
+    del current_user
     try:
         records = [ExpenseRecord.model_validate(item) for item in await fetch_recent_expenses(token, days=30)]
     except Exception as exc:
@@ -126,4 +128,4 @@ async def summary(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host=os.getenv("APP_HOST", "0.0.0.0"), port=int(os.getenv("APP_PORT", "8003")), reload=True)
+    uvicorn.run("app.main:app", host=os.getenv("APP_HOST", "0.0.0.0"), port=int(os.getenv("APP_PORT", "8003")), reload=True)
