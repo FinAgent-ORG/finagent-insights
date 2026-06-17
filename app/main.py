@@ -61,7 +61,7 @@ async def health() -> dict[str, str]:
 def _fallback_response() -> InsightsResponse:
     return InsightsResponse(
         insights=["There was not enough recent expense data to generate strong insights."],
-        suggestions=["Log more expenses over time to unlock better trend analysis."],
+        suggestions=["Log more company expenses over time to unlock better trend analysis."],
     )
 
 
@@ -94,7 +94,7 @@ async def generate_insights(expenses: list[ExpenseRecord]) -> InsightsResponse:
     if not expenses:
         return InsightsResponse(
             insights=["No expenses were found for the last 30 days."],
-            suggestions=["Log a few expenses to unlock personalized insights."],
+            suggestions=["Log a few company expenses to unlock better operating insights."],
         )
 
     serialized = json.dumps([expense.model_dump(mode="json") for expense in expenses], ensure_ascii=False)
